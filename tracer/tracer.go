@@ -51,6 +51,9 @@ type Options struct {
 }
 
 func TracerMwWithOptions(options Options, traceHeader string) gin.HandlerFunc {
+	if traceHeader == "" {
+		traceHeader = "zr-request-id"
+	}
 	return func(c *gin.Context) {
 		// before request
 		if options.LatencyEnable {
@@ -87,11 +90,11 @@ func TracerMwWithOptions(options Options, traceHeader string) gin.HandlerFunc {
 	}
 }
 
-func LoggerDefault() gin.HandlerFunc {
+func LoggerDefault(traceHeader string) gin.HandlerFunc {
 	return gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 		return fmt.Sprintf("%s - [%s %s %s] %s %-7s %s | %s %d %s | \"%s %s  %s %s\"\n",
 			param.TimeStamp.Format(time.RFC3339),
-			konst.RedColor, param.Request.Header.Get("zr-request-id"), konst.ResetColor,
+			konst.RedColor, param.Request.Header.Get(traceHeader), konst.ResetColor,
 			konst.BlueColor, param.Method, konst.ResetColor,
 			konst.GreenColor, param.StatusCode, konst.ResetColor,
 			param.Path,
